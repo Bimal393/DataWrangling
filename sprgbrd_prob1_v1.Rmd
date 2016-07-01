@@ -1,0 +1,50 @@
+---
+title: "Sprgbrd_Prob1_v1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Basic data Manupulation
+
+Loading libraries
+```{r}
+suppressMessages(library(dplyr))
+library(tidyr)
+
+```
+
+## Loading data into R
+
+```{r }
+refine <- read.csv(file = 'refine_original.csv',header = TRUE)
+refine_tb <- tbl_df(refine)
+refine_tb
+```
+
+## Cleaning Company Names
+
+```{r}
+refine_tb$company <- tolower(refine_tb$company)
+refine_tb
+
+```
+
+## Separate product code and number
+```{r}
+refine_tb <- refine_tb %>%
+  separate(Product.code...number,c("product_code","number"))
+refine_tb
+
+```
+# Adding product categories
+```{r}
+lookup_tbl <- c( p = "Smartphone",v = "TV",x = "Laptop",q = "Tablet")
+refine_tb <- refine_tb %>% 
+  mutate(product_category = lookup_tbl[product_code])
+glimpse(refine_tb)
+
+```
+
