@@ -100,5 +100,8 @@ refine_tb4$product_Smartphone <-ifelse(!is.na(refine_tb4$product_Smartphone),1,0
 refine_tb4$product_Tablet <-ifelse(!is.na(refine_tb4$product_Tablet),1,0)
 refine_tb4$product_TV <-ifelse(!is.na(refine_tb4$product_TV),1,0)
 glimpse(refine_tb4)
+
+# writing to a file
+write.csv(refine_tb4,"refine_clean.csv")
 ```
 
