@@ -1,0 +1,63 @@
+---
+title: "Sprgbrd_Prob1_v1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Basic data Manupulation
+
+Loading libraries
+```{r}
+suppressMessages(library(dplyr))
+library(tidyr)
+library(stringr)
+
+```
+
+## Loading data into R
+
+```{r }
+titanic <- read.csv(file = 'titanic_original.csv',header = TRUE,na.strings = "")
+titanic_tb <- tbl_df(titanic)
+glimpse(titanic_tb)
+summary(titanic_tb)
+```
+
+# Port of embarkation
+```{r}
+ind_embarkation <- which(is.na(titanic_tb$embarked))
+titanic_tb$embarked[ind_embarkation] <- "S" 
+summary(titanic_tb)
+```
+#Age
+```{r}
+mean_age <- mean(titanic_tb$age,na.rm = TRUE)
+ind <- which(is.na(titanic_tb$age))
+titanic_tb$age[ind] <- mean_age
+summary(titanic_tb)
+```
+
+#Lifeboat
+```{r}
+ind_boat <- which(is.na(titanic_tb$boat))
+titanic_tb$boat[ind_boat] <- NA 
+summary(titanic_tb)
+```
+#Cabin
+```{r}
+titanic_tb1 <- titanic_tb %>% 
+  mutate(has_cabin_number = as.factor(if_else(!is.na(cabin),1,0)))
+glimpse(titanic_tb1)
+summary(titanic_tb1)
+
+```
+#Output
+
+```{r}
+write.csv(titanic_tb1,"titanic_clean.csv")
+```
+
+
