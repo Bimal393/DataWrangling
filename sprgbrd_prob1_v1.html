@@ -123,7 +123,8 @@ $(document).ready(function () {
 <h2>R Basic data Manupulation</h2>
 <p>Loading libraries</p>
 <pre class="r"><code>suppressMessages(library(dplyr))
-library(tidyr)</code></pre>
+library(tidyr)
+library(stringr)</code></pre>
 </div>
 <div id="loading-data-into-r" class="section level2">
 <h2>Loading data into R</h2>
@@ -149,56 +150,100 @@ refine_tb</code></pre>
 </div>
 <div id="cleaning-company-names" class="section level2">
 <h2>Cleaning Company Names</h2>
-<pre class="r"><code>refine_tb$company &lt;- tolower(refine_tb$company)
-refine_tb</code></pre>
-<pre><code>## Source: local data frame [25 x 6]
+<p>distinct company names</p>
+<pre class="r"><code>distinct(refine_tb,company)</code></pre>
+<pre><code>## Source: local data frame [19 x 1]
 ## 
-##     company Product.code...number             address   city
-##       &lt;chr&gt;                &lt;fctr&gt;              &lt;fctr&gt; &lt;fctr&gt;
-## 1  phillips                   p-5 Groningensingel 147 arnhem
-## 2  phillips                  p-43 Groningensingel 148 arnhem
-## 3   philips                   x-3 Groningensingel 149 arnhem
-## 4   phllips                  x-34 Groningensingel 150 arnhem
-## 5   phillps                  x-12 Groningensingel 151 arnhem
-## 6  phillips                  p-23 Groningensingel 152 arnhem
-## 7      akzo                  v-43   Leeuwardenweg 178 arnhem
-## 8      akzo                  v-12   Leeuwardenweg 179 arnhem
-## 9      akzo                   x-5   Leeuwardenweg 180 arnhem
-## 10     akz0                  p-34   Leeuwardenweg 181 arnhem
-## ..      ...                   ...                 ...    ...
-## Variables not shown: country &lt;fctr&gt;, name &lt;fctr&gt;.</code></pre>
+##       company
+##        &lt;fctr&gt;
+## 1    Phillips
+## 2    phillips
+## 3     philips
+## 4     phllips
+## 5     phillps
+## 6    phillipS
+## 7        akzo
+## 8        Akzo
+## 9        AKZO
+## 10       akz0
+## 11      ak zo
+## 12    fillips
+## 13     phlips
+## 14 Van Houten
+## 15 van Houten
+## 16 van houten
+## 17    unilver
+## 18   unilever
+## 19   Unilever</code></pre>
+<p>lower letters</p>
+<pre class="r"><code>refine_tb$company &lt;- tolower(refine_tb$company)
+distinct(refine_tb,company)</code></pre>
+<pre><code>## Source: local data frame [12 x 1]
+## 
+##       company
+##         &lt;chr&gt;
+## 1    phillips
+## 2     philips
+## 3     phllips
+## 4     phillps
+## 5        akzo
+## 6        akz0
+## 7       ak zo
+## 8     fillips
+## 9      phlips
+## 10 van houten
+## 11    unilver
+## 12   unilever</code></pre>
+<p>cleaning akzo</p>
+<pre class="r"><code>refine_tb$company &lt;- str_replace(refine_tb$company,&quot;k\\sz&quot;,&quot;kz&quot;)
+refine_tb$company &lt;- str_replace(refine_tb$company,&quot;z[0-9]&quot;,&quot;zo&quot;)</code></pre>
+<p>cleaning unilever</p>
+<pre class="r"><code>refine_tb$company &lt;- str_replace(refine_tb$company,&quot;unilv&quot;,&quot;unilev&quot;)</code></pre>
+<p>cleaning philips</p>
+<pre class="r"><code>refine_tb$company &lt;- str_replace(refine_tb$company,&quot;illi|lli|ill&quot;,&quot;ili&quot;)
+refine_tb$company &lt;- str_replace(refine_tb$company,&quot;fi&quot;,&quot;phi&quot;)
+refine_tb$company &lt;- str_replace(refine_tb$company,&quot;hl&quot;,&quot;hil&quot;)
+distinct(refine_tb,company)</code></pre>
+<pre><code>## Source: local data frame [4 x 1]
+## 
+##      company
+##        &lt;chr&gt;
+## 1    philips
+## 2       akzo
+## 3 van houten
+## 4   unilever</code></pre>
 </div>
 <div id="separate-product-code-and-number" class="section level2">
 <h2>Separate product code and number</h2>
-<pre class="r"><code>refine_tb &lt;- refine_tb %&gt;%
+<pre class="r"><code>refine_tb1 &lt;- refine_tb %&gt;%
   separate(Product.code...number,c(&quot;product_code&quot;,&quot;number&quot;))
-refine_tb</code></pre>
+refine_tb1</code></pre>
 <pre><code>## Source: local data frame [25 x 7]
 ## 
-##     company product_code number             address   city         country
-##       &lt;chr&gt;        &lt;chr&gt;  &lt;chr&gt;              &lt;fctr&gt; &lt;fctr&gt;          &lt;fctr&gt;
-## 1  phillips            p      5 Groningensingel 147 arnhem the netherlands
-## 2  phillips            p     43 Groningensingel 148 arnhem the netherlands
-## 3   philips            x      3 Groningensingel 149 arnhem the netherlands
-## 4   phllips            x     34 Groningensingel 150 arnhem the netherlands
-## 5   phillps            x     12 Groningensingel 151 arnhem the netherlands
-## 6  phillips            p     23 Groningensingel 152 arnhem the netherlands
-## 7      akzo            v     43   Leeuwardenweg 178 arnhem the netherlands
-## 8      akzo            v     12   Leeuwardenweg 179 arnhem the netherlands
-## 9      akzo            x      5   Leeuwardenweg 180 arnhem the netherlands
-## 10     akz0            p     34   Leeuwardenweg 181 arnhem the netherlands
-## ..      ...          ...    ...                 ...    ...             ...
+##    company product_code number             address   city         country
+##      &lt;chr&gt;        &lt;chr&gt;  &lt;chr&gt;              &lt;fctr&gt; &lt;fctr&gt;          &lt;fctr&gt;
+## 1  philips            p      5 Groningensingel 147 arnhem the netherlands
+## 2  philips            p     43 Groningensingel 148 arnhem the netherlands
+## 3  philips            x      3 Groningensingel 149 arnhem the netherlands
+## 4  philips            x     34 Groningensingel 150 arnhem the netherlands
+## 5  philips            x     12 Groningensingel 151 arnhem the netherlands
+## 6  philips            p     23 Groningensingel 152 arnhem the netherlands
+## 7     akzo            v     43   Leeuwardenweg 178 arnhem the netherlands
+## 8     akzo            v     12   Leeuwardenweg 179 arnhem the netherlands
+## 9     akzo            x      5   Leeuwardenweg 180 arnhem the netherlands
+## 10    akzo            p     34   Leeuwardenweg 181 arnhem the netherlands
+## ..     ...          ...    ...                 ...    ...             ...
 ## Variables not shown: name &lt;fctr&gt;.</code></pre>
 </div>
 <div id="adding-product-categories" class="section level1">
 <h1>Adding product categories</h1>
 <pre class="r"><code>lookup_tbl &lt;- c( p = &quot;Smartphone&quot;,v = &quot;TV&quot;,x = &quot;Laptop&quot;,q = &quot;Tablet&quot;)
-refine_tb &lt;- refine_tb %&gt;% 
+refine_tb2 &lt;- refine_tb1 %&gt;% 
   mutate(product_category = lookup_tbl[product_code])
-glimpse(refine_tb)</code></pre>
+glimpse(refine_tb2)</code></pre>
 <pre><code>## Observations: 25
 ## Variables: 8
-## $ company          (chr) &quot;phillips&quot;, &quot;phillips&quot;, &quot;philips&quot;, &quot;phllips&quot;,...
+## $ company          (chr) &quot;philips&quot;, &quot;philips&quot;, &quot;philips&quot;, &quot;philips&quot;, &quot;...
 ## $ product_code     (chr) &quot;p&quot;, &quot;p&quot;, &quot;x&quot;, &quot;x&quot;, &quot;x&quot;, &quot;p&quot;, &quot;v&quot;, &quot;v&quot;, &quot;x&quot;, ...
 ## $ number           (chr) &quot;5&quot;, &quot;43&quot;, &quot;3&quot;, &quot;34&quot;, &quot;12&quot;, &quot;23&quot;, &quot;43&quot;, &quot;12&quot;,...
 ## $ address          (fctr) Groningensingel 147, Groningensingel 148, Gr...
@@ -206,6 +251,72 @@ glimpse(refine_tb)</code></pre>
 ## $ country          (fctr) the netherlands, the netherlands, the nether...
 ## $ name             (fctr) dhr p. jansen, dhr p. hansen, dhr j. Gansen,...
 ## $ product_category (chr) &quot;Smartphone&quot;, &quot;Smartphone&quot;, &quot;Laptop&quot;, &quot;Laptop...</code></pre>
+</div>
+<div id="adding-full-address-for-geocoding" class="section level1">
+<h1>Adding full address for geocoding</h1>
+<pre class="r"><code>refine_tb3 &lt;- unite(refine_tb2,full_address,address,city,country,sep = ',')
+refine_tb3</code></pre>
+<pre><code>## Source: local data frame [25 x 6]
+## 
+##    company product_code number                               full_address
+##      &lt;chr&gt;        &lt;chr&gt;  &lt;chr&gt;                                      &lt;chr&gt;
+## 1  philips            p      5 Groningensingel 147,arnhem,the netherlands
+## 2  philips            p     43 Groningensingel 148,arnhem,the netherlands
+## 3  philips            x      3 Groningensingel 149,arnhem,the netherlands
+## 4  philips            x     34 Groningensingel 150,arnhem,the netherlands
+## 5  philips            x     12 Groningensingel 151,arnhem,the netherlands
+## 6  philips            p     23 Groningensingel 152,arnhem,the netherlands
+## 7     akzo            v     43   Leeuwardenweg 178,arnhem,the netherlands
+## 8     akzo            v     12   Leeuwardenweg 179,arnhem,the netherlands
+## 9     akzo            x      5   Leeuwardenweg 180,arnhem,the netherlands
+## 10    akzo            p     34   Leeuwardenweg 181,arnhem,the netherlands
+## ..     ...          ...    ...                                        ...
+## Variables not shown: name &lt;fctr&gt;, product_category &lt;chr&gt;.</code></pre>
+</div>
+<div id="create-dummy-variables-for-company-and-product-category" class="section level1">
+<h1>Create dummy variables for company and product category</h1>
+<pre class="r"><code>refine_tb4 &lt;- refine_tb3 %&gt;% 
+  mutate(company=paste('company',company,sep = &quot;_&quot;),product_category = paste(&quot;product&quot;,product_category,sep = '_')) %&gt;% 
+  spread(company,company) %&gt;%
+  spread(product_category,product_category)
+glimpse(refine_tb4)</code></pre>
+<pre><code>## Observations: 25
+## Variables: 12
+## $ product_code       (chr) &quot;p&quot;, &quot;p&quot;, &quot;p&quot;, &quot;p&quot;, &quot;p&quot;, &quot;p&quot;, &quot;q&quot;, &quot;q&quot;, &quot;q&quot;...
+## $ number             (chr) &quot;23&quot;, &quot;23&quot;, &quot;34&quot;, &quot;43&quot;, &quot;5&quot;, &quot;56&quot;, &quot;4&quot;, &quot;5&quot;...
+## $ full_address       (chr) &quot;Delfzijlstraat 61,arnhem,the netherlands&quot;,...
+## $ name               (fctr) mevr l.  dokken, dhr p. franssen, dhr p. j...
+## $ company_akzo       (chr) NA, NA, &quot;company_akzo&quot;, NA, NA, NA, NA, &quot;co...
+## $ company_philips    (chr) NA, &quot;company_philips&quot;, NA, &quot;company_philips...
+## $ company_unilever   (chr) NA, NA, NA, NA, NA, NA, &quot;company_unilever&quot;,...
+## $ company_van houten (chr) &quot;company_van houten&quot;, NA, NA, NA, NA, NA, N...
+## $ product_Laptop     (chr) NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
+## $ product_Smartphone (chr) &quot;product_Smartphone&quot;, &quot;product_Smartphone&quot;,...
+## $ product_Tablet     (chr) NA, NA, NA, NA, NA, NA, &quot;product_Tablet&quot;, &quot;...
+## $ product_TV         (chr) NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...</code></pre>
+<pre class="r"><code>refine_tb4$company_akzo &lt;- ifelse(!is.na(refine_tb4$company_akzo),1,0)
+refine_tb4$company_philips &lt;- ifelse(!is.na(refine_tb4$company_philips),1,0)
+refine_tb4$company_unilever &lt;- ifelse(!is.na(refine_tb4$company_unilever),1,0)
+refine_tb4$`company_van houten` &lt;-ifelse(!is.na(refine_tb4$`company_van houten`),1,0)
+refine_tb4$product_Laptop &lt;-ifelse(!is.na(refine_tb4$product_Laptop),1,0)
+refine_tb4$product_Smartphone &lt;-ifelse(!is.na(refine_tb4$product_Smartphone),1,0)
+refine_tb4$product_Tablet &lt;-ifelse(!is.na(refine_tb4$product_Tablet),1,0)
+refine_tb4$product_TV &lt;-ifelse(!is.na(refine_tb4$product_TV),1,0)
+glimpse(refine_tb4)</code></pre>
+<pre><code>## Observations: 25
+## Variables: 12
+## $ product_code       (chr) &quot;p&quot;, &quot;p&quot;, &quot;p&quot;, &quot;p&quot;, &quot;p&quot;, &quot;p&quot;, &quot;q&quot;, &quot;q&quot;, &quot;q&quot;...
+## $ number             (chr) &quot;23&quot;, &quot;23&quot;, &quot;34&quot;, &quot;43&quot;, &quot;5&quot;, &quot;56&quot;, &quot;4&quot;, &quot;5&quot;...
+## $ full_address       (chr) &quot;Delfzijlstraat 61,arnhem,the netherlands&quot;,...
+## $ name               (fctr) mevr l.  dokken, dhr p. franssen, dhr p. j...
+## $ company_akzo       (dbl) 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0...
+## $ company_philips    (dbl) 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0...
+## $ company_unilever   (dbl) 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0...
+## $ company_van houten (dbl) 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1...
+## $ product_Laptop     (dbl) 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+## $ product_Smartphone (dbl) 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0...
+## $ product_Tablet     (dbl) 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0...
+## $ product_TV         (dbl) 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1...</code></pre>
 </div>
 
 

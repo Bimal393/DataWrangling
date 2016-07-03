@@ -13,6 +13,7 @@ Loading libraries
 ```{r}
 suppressMessages(library(dplyr))
 library(tidyr)
+library(stringr)
 
 ```
 
@@ -26,25 +27,78 @@ refine_tb
 
 ## Cleaning Company Names
 
+distinct company names
+```{r}
+distinct(refine_tb,company)
+```
+
+
+lower letters
+
 ```{r}
 refine_tb$company <- tolower(refine_tb$company)
-refine_tb
+distinct(refine_tb,company)
 
 ```
 
+cleaning akzo
+
+```{r}
+refine_tb$company <- str_replace(refine_tb$company,"k\\sz","kz")
+refine_tb$company <- str_replace(refine_tb$company,"z[0-9]","zo")
+```
+cleaning unilever
+
+```{r}
+refine_tb$company <- str_replace(refine_tb$company,"unilv","unilev")
+
+```
+cleaning philips
+```{r}
+refine_tb$company <- str_replace(refine_tb$company,"illi|lli|ill","ili")
+refine_tb$company <- str_replace(refine_tb$company,"fi","phi")
+refine_tb$company <- str_replace(refine_tb$company,"hl","hil")
+distinct(refine_tb,company)
+```
+
+
 ## Separate product code and number
 ```{r}
-refine_tb <- refine_tb %>%
+refine_tb1 <- refine_tb %>%
   separate(Product.code...number,c("product_code","number"))
-refine_tb
+refine_tb1
 
 ```
 # Adding product categories
 ```{r}
 lookup_tbl <- c( p = "Smartphone",v = "TV",x = "Laptop",q = "Tablet")
-refine_tb <- refine_tb %>% 
+refine_tb2 <- refine_tb1 %>% 
   mutate(product_category = lookup_tbl[product_code])
-glimpse(refine_tb)
+glimpse(refine_tb2)
 
+```
+# Adding full address for geocoding
+```{r}
+refine_tb3 <- unite(refine_tb2,full_address,address,city,country,sep = ',')
+refine_tb3
+```
+# Create dummy variables for company and product category
+```{r}
+refine_tb4 <- refine_tb3 %>% 
+  mutate(company=paste('company',company,sep = "_"),product_category = paste("product",product_category,sep = '_')) %>% 
+  spread(company,company) %>%
+  spread(product_category,product_category)
+glimpse(refine_tb4)
+
+#converting into binary.
+refine_tb4$company_akzo <- ifelse(!is.na(refine_tb4$company_akzo),1,0)
+refine_tb4$company_philips <- ifelse(!is.na(refine_tb4$company_philips),1,0)
+refine_tb4$company_unilever <- ifelse(!is.na(refine_tb4$company_unilever),1,0)
+refine_tb4$`company_van houten` <-ifelse(!is.na(refine_tb4$`company_van houten`),1,0)
+refine_tb4$product_Laptop <-ifelse(!is.na(refine_tb4$product_Laptop),1,0)
+refine_tb4$product_Smartphone <-ifelse(!is.na(refine_tb4$product_Smartphone),1,0)
+refine_tb4$product_Tablet <-ifelse(!is.na(refine_tb4$product_Tablet),1,0)
+refine_tb4$product_TV <-ifelse(!is.na(refine_tb4$product_TV),1,0)
+glimpse(refine_tb4)
 ```
 
